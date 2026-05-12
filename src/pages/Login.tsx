@@ -1,26 +1,27 @@
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
+
+  // Si ya está logueado, redirigir
+  useEffect(() => {
+    if (auth.currentUser) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-
     try {
       await signInWithPopup(auth, googleProvider);
-
-      // REDIRECCIÓN AL HOME
-      navigate('/');
-
+      navigate('/'); // Redirección explícita
     } catch (error) {
-      console.error(error);
+      console.error("Error al iniciar sesión:", error);
     }
-
     setLoading(false);
   };
 
@@ -59,9 +60,13 @@ export default function Login() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-white text-black py-4 rounded-2xl font-medium flex items-center justify-center gap-3 hover:bg-gray-100 disabled:opacity-70"
+            className="w-full bg-white text-black py-4 rounded-2xl font-medium flex items-center justify-center gap-3 hover:bg-gray-100 disabled:opacity-70 transition-all"
           >
-            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" className="h-5" />
+            <img 
+              src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" 
+              alt="Google" 
+              className="h-5" 
+            />
             Continuar con Google
           </button>
         </div>

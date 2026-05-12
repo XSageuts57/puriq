@@ -1,10 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
 import Login from './pages/Login';
-// Importamos las páginas (las crearemos después)
 import Home from './pages/Home';
 import Destinations from './pages/Destinations';
 import DestinationDetail from './pages/DestinationDetail';
@@ -33,16 +32,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Si NO hay usuario → va al Login */}
-        {!user ? (
-          <Route path="*" element={<Login />} />
-        ) : (
-          /* Si hay usuario → puede navegar */
+        {/* Rutas Públicas */}
+        <Route 
+          path="/login" 
+          element={!user ? <Login /> : <Navigate to="/" replace />} 
+        />
+
+        {/* Rutas Protegidas */}
+        {user ? (
           <>
             <Route path="/" element={<Home />} />
             <Route path="/destinos" element={<Destinations />} />
             <Route path="/destinos/:id" element={<DestinationDetail />} />
+            {/* Agrega más rutas aquí después */}
           </>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" replace />} />
         )}
       </Routes>
     </Router>
