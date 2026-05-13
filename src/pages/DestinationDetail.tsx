@@ -1,5 +1,6 @@
 import BottomNav from '../components/BottomNav';
 import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   Star,
   MapPin,
@@ -10,11 +11,25 @@ import { destinations } from '../data/destinations';
 
 export default function DestinationDetail() {
   const { id } = useParams();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // BUSCAR DESTINO
   const destination = destinations.find(
     (dest) => dest.id === id
   );
+
+  // Carrusel automático con animación - cambia de imagen cada 4 segundos
+  useEffect(() => {
+    if (!destination?.gallery.length) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => 
+        prev + 1 >= destination.gallery.length ? 0 : prev + 1
+      );
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [destination?.gallery.length]);
 
   // SI NO EXISTE
   if (!destination) {
@@ -28,14 +43,24 @@ export default function DestinationDetail() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white pb-24">
 
-      {/* HERO */}
+      {/* HERO CON CARRUSEL Y ANIMACIÓN */}
       <div className="relative h-[450px] overflow-hidden">
-
-        <img
-          src={destination.image}
-          alt={destination.title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        
+        {/* Contenedor de imágenes con animación de deslizamiento */}
+        <div 
+          className="flex transition-transform duration-700 ease-out h-full"
+          style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+        >
+          {(destination.gallery || [destination.image]).map((img, idx) => (
+            <div key={idx} className="min-w-full h-full relative">
+              <img
+                src={img}
+                alt={`${destination.title} - ${idx + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-black/10"></div>
 
@@ -114,12 +139,13 @@ export default function DestinationDetail() {
                 <div
                   key={index}
                   className="group overflow-hidden rounded-2xl"
+                  onClick={() => setCurrentImageIndex(index)}
                 >
 
                   <img
                     src={image}
                     alt={destination.title}
-                    className="h-52 md:h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="h-52 md:h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
                   />
 
                 </div>
@@ -129,7 +155,6 @@ export default function DestinationDetail() {
           </div>
 
         </div>
-
 
       </div>
 

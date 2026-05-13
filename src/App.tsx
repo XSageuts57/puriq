@@ -7,6 +7,12 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Destinations from './pages/Destinations';
 import DestinationDetail from './pages/DestinationDetail';
+import Accommodations from './pages/Accommodations';
+import AccommodationDetail from './pages/AccommodationDetail';
+import Restaurants from './pages/Restaurants';
+import RestaurantDetail from './pages/RestaurantDetail';
+import Tours from './pages/Tours';              // ← NUEVO
+import TourDetail from './pages/TourDetail';    // ← NUEVO
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -32,19 +38,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Rutas Públicas */}
         <Route 
           path="/login" 
           element={!user ? <Login /> : <Navigate to="/" replace />} 
         />
 
-        {/* Rutas Protegidas */}
         {user ? (
           <>
             <Route path="/" element={<Home />} />
             <Route path="/destinos" element={<Destinations />} />
             <Route path="/destinos/:id" element={<DestinationDetail />} />
-            {/* Agrega más rutas aquí después */}
+            <Route path="/alojamientos" element={<Accommodations />} />
+            <Route path="/alojamientos/:id" element={<AccommodationDetail />} />
+            <Route path="/restaurantes" element={<Restaurants />} />
+            <Route path="/restaurantes/:id" element={<RestaurantDetail />} />
+            <Route path="/tours" element={<Tours />} />
+            <Route path="/tours/:id" element={<TourDetail />} />
           </>
         ) : (
           <Route path="*" element={<Navigate to="/login" replace />} />

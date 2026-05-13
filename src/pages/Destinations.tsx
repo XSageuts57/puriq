@@ -71,10 +71,10 @@ export default function Destinations() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-24">
+    <div className="min-h-screen bg-black text-white pb-24">
 
-      {/* HEADER */}
-      <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-white/10">
+      {/* HEADER - CAMBIADO: bg-zinc-950/80 → bg-black/80 */}
+      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-5 py-4">
 
           <p className="text-red-400 text-sm font-semibold uppercase tracking-wider mb-1">
