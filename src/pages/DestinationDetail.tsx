@@ -4,7 +4,6 @@ import {
   Star,
   MapPin,
   Camera,
-  MessageCircle,
 } from 'lucide-react';
 
 import { destinations } from '../data/destinations';
@@ -131,62 +130,6 @@ export default function DestinationDetail() {
 
         </div>
 
-        {/* OPINIONES */}
-        <div className="mt-10">
-
-          <div className="flex items-center gap-2 mb-5">
-
-            <MessageCircle size={20} />
-
-            <h2 className="text-2xl font-bold">
-              Opiniones
-            </h2>
-
-          </div>
-
-          <div className="space-y-4">
-
-            {destination.reviews.map(
-              (review, index) => (
-                <div
-                  key={index}
-                  className="bg-zinc-900 border border-white/5 rounded-3xl p-5"
-                >
-
-                  <div className="flex items-center gap-4 mb-4">
-
-                    {/* AVATAR */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center font-bold text-lg">
-                      {review.name.charAt(0)}
-                    </div>
-
-                    {/* INFO */}
-                    <div>
-
-                      <h4 className="font-semibold">
-                        {review.name}
-                      </h4>
-
-                      <div className="flex text-yellow-400 text-sm">
-                        {'★'.repeat(review.rating)}
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  {/* COMENTARIO */}
-                  <p className="text-zinc-300 text-sm leading-relaxed">
-                    {review.comment}
-                  </p>
-
-                </div>
-              )
-            )}
-
-          </div>
-
-        </div>
 
       </div>
 

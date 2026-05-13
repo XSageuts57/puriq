@@ -2,50 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  /* Scrollbar personalizado */
-  ::-webkit-scrollbar {
-    width: 6px;
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
   }
-  
-  ::-webkit-scrollbar-track {
-    background: #18181b;
+  50% {
+    background-position: 100% 50%;
   }
-  
-  ::-webkit-scrollbar-thumb {
-    background: #ef4444;
-    border-radius: 3px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: #dc2626;
-  }
-  
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  /* Mejora de tap highlight en mobile */
-  * {
-    -webkit-tap-highlight-color: transparent;
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-@layer components {
-  /* Animación de fade-in */
-  .fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.animate-gradient {
+  background-size: 200% auto;
+  animation: gradient 3s linear infinite;
+}
+
+/* Scrollbar personalizado premium */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #dc2626, #b91c1c);
+}
+
+/* Gradiente radial para fondos suaves */
+.bg-gradient-radial {
+  background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+}
+
+/* Mejora la calidad de imagen en móvil */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Transición suave para el header */
+header {
+  transition: background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.7s ease;
+}
+
+/* Efecto de texto más limpio */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

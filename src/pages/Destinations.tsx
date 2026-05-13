@@ -45,7 +45,7 @@ export default function Destinations() {
       rating: 4.7,
       category: 'Cultura',
       image:
-        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+        '/images/lago-titicaca.jpg',
       description:
         'El lago navegable más alto del mundo.',
     },
@@ -57,7 +57,7 @@ export default function Destinations() {
       rating: 4.9,
       category: 'Aventura',
       image:
-        'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800',
+        '/images/huacachina.jpg',
       description:
         'Dunas gigantes, tubulares y sunsets increíbles.',
     },
