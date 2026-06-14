@@ -18,9 +18,9 @@ import {
   Compass,
   CheckCircle,
   XCircle,
-  MessageCircle,
 } from 'lucide-react';
 import { tours } from '../data/tours';
+import Reviews from '../components/Reviews';
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -174,6 +174,14 @@ export default function TourDetail() {
                 ))}
               </div>
             </div>
+
+            {/* SECCIÓN DE OPINIONES - NUEVA */}
+            <div className="mt-6">
+              <Reviews 
+                itemId={tour.id} 
+                itemType="tour"
+              />
+            </div>
           </div>
 
           {/* Columna derecha - Tarjeta de información */}
@@ -238,13 +246,6 @@ export default function TourDetail() {
               <button className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-red-600/30 mb-4">
                 Reservar ahora
               </button>
-
-              {tour.contact.whatsapp && (
-                <button className="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2">
-                  <MessageCircle size={18} />
-                  Consultar por WhatsApp
-                </button>
-              )}
 
               {/* Contacto */}
               <div className="border-t border-white/10 pt-4 mt-4">

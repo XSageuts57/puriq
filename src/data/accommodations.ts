@@ -24,6 +24,9 @@ export interface Accommodation {
   };
 }
 
+
+
+
 export const accommodations: Accommodation[] = [
   {
     id: "belmond-sanctuary-lodge",
@@ -186,4 +189,56 @@ export const accommodations: Accommodation[] = [
       lng: -69.1842
     }
   }
+
+  
 ];
+
+
+// Interfaz para alojamientos de usuario
+interface UserAccommodation {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  image: string;
+  description: string;
+  type?: 'hotel' | 'hostal' | 'resort' | 'casa' | 'eco-lodge';
+  amenities?: string[];
+  gallery?: string[];
+  includes?: string[];
+  notIncludes?: string[];
+  contactPhone?: string;
+  contactEmail?: string;
+  isUserAdded?: boolean;
+}
+
+export const getAllAccommodations = (): Accommodation[] => {
+  const userAccommodations: UserAccommodation[] = JSON.parse(localStorage.getItem('user_accommodations') || '[]');
+  
+  // Asegurar que los alojamientos de usuario tengan la estructura correcta
+  const formattedUserAccommodations: Accommodation[] = userAccommodations.map((acc: UserAccommodation) => ({
+    id: acc.id,
+    title: acc.title,
+    location: acc.location,
+    price: acc.price,
+    rating: acc.rating || 0,
+    reviews: acc.reviews || 0,
+    image: acc.image,
+    gallery: acc.gallery || [acc.image],
+    type: acc.type || 'hotel',
+    amenities: acc.amenities || ['WiFi gratis'],
+    description: acc.description,
+    longDescription: acc.description,
+    includes: acc.includes || [],
+    notIncludes: acc.notIncludes || [],
+    contact: {
+      phone: acc.contactPhone || '',
+      email: acc.contactEmail || '',
+    },
+    coordinates: { lat: 0, lng: 0 },
+  }));
+  
+  return [...accommodations, ...formattedUserAccommodations];
+};

@@ -17,12 +17,15 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { restaurants } from '../data/restaurants';
+import Reviews from '../components/Reviews';
+import BookingModal from '../components/BookingModal';
 
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   const restaurant = restaurants.find((res) => res.id === id);
 
@@ -172,6 +175,14 @@ export default function RestaurantDetail() {
                 ))}
               </div>
             </div>
+
+            {/* SECCIÓN DE OPINIONES */}
+            <div className="mt-6">
+              <Reviews 
+                itemId={restaurant.id} 
+                itemType="restaurant"
+              />
+            </div>
           </div>
 
           {/* Columna derecha - Tarjeta de información */}
@@ -204,7 +215,11 @@ export default function RestaurantDetail() {
                 </div>
               </div>
 
-              <button className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-red-600/30 mb-4">
+              {/* Botón de reserva actualizado */}
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-red-600/30 mb-4"
+              >
                 Reservar mesa
               </button>
 
@@ -242,6 +257,15 @@ export default function RestaurantDetail() {
           </button>
         </div>
       </div>
+
+      {/* Modal de reserva para restaurante */}
+      <BookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        type="restaurant"
+        itemTitle={restaurant.title}
+        itemLocation={restaurant.location}
+      />
 
       <BottomNav />
     </div>

@@ -1,13 +1,16 @@
 import BottomNav from '../components/BottomNav';
-import { Search, Compass, Bed, Utensils, Ticket, Sparkles, ArrowRight, Star, MapPin, Users } from 'lucide-react';
+import { Search, Compass, Bed, Utensils, Ticket, Sparkles, ArrowRight, Star, MapPin, Users, Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import AddContentModal from '../components/AddContentModal';
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addType, setAddType] = useState<'accommodation' | 'restaurant' | 'tour'>('accommodation');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,13 +30,41 @@ export default function Home() {
     }
   };
 
-  const categories = [
-    { icon: Compass, label: "Destinos", desc: "Parques y lugares icónicos", color: "from-red-600 to-orange-500" },
-    { icon: Bed, label: "Alojamientos", desc: "Hoteles y hospedajes", color: "from-amber-600 to-yellow-500" },
-    { icon: Utensils, label: "Restaurantes", desc: "Gastronomía peruana", color: "from-emerald-600 to-green-500" },
-    { icon: Ticket, label: "Tours", desc: "Experiencias guiadas", color: "from-violet-600 to-purple-500" },
-  ];
+  const handleAddContent = (type: 'accommodation' | 'restaurant' | 'tour') => {
+    setAddType(type);
+    setShowAddModal(true);
+  };
 
+  const categories = [
+    { 
+      icon: Compass, 
+      label: "Destinos", 
+      desc: "Parques y lugares icónicos", 
+      color: "from-red-600 to-orange-500",
+      path: "/destinos"
+    },
+    { 
+      icon: Bed, 
+      label: "Alojamientos", 
+      desc: "Hoteles y hospedajes", 
+      color: "from-amber-600 to-yellow-500",
+      path: "/alojamientos"
+    },
+    { 
+      icon: Utensils, 
+      label: "Restaurantes", 
+      desc: "Gastronomía peruana", 
+      color: "from-emerald-600 to-green-500",
+      path: "/restaurantes"
+    },
+    { 
+      icon: Ticket, 
+      label: "Tours", 
+      desc: "Experiencias guiadas", 
+      color: "from-violet-600 to-purple-500",
+      path: "/tours"
+    },
+  ];
 
   const experiences = [
     { icon: "🏔️", title: "Trekking", desc: "Rutas al aire libre", active: true },
@@ -45,19 +76,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
       
-      {/* Efectos de fondo MEJORADOS - Sin pixelado */}
+      {/* Efectos de fondo */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Gradiente principal más suave */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-gradient-radial from-red-600/15 via-transparent to-transparent opacity-70"></div>
-        
-        {/* Gradiente secundario */}
         <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-gradient-radial from-purple-600/10 via-transparent to-transparent"></div>
-        
-        {/* Gradiente terciario más sutil */}
         <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-gradient-radial from-blue-500/5 via-transparent to-transparent"></div>
       </div>
 
-      {/* Header con transición SUAVE */}
+      {/* Header */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
         scrolled 
           ? 'bg-black/95 backdrop-blur-xl border-b border-white/10 shadow-2xl' 
@@ -78,6 +104,16 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Botón de agregar contenido (solo icono, sin texto) */}
+            <div className="relative group">
+              <button
+                onClick={() => handleAddContent('accommodation')}
+                className="relative w-9 h-9 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all"
+                title="Agregar contenido"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
             <button className="relative group">
               <div className="relative w-9 h-9 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all">
                 <Sparkles size={18} className="text-yellow-400" />
@@ -95,23 +131,18 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section con transición limpia */}
+      {/* Hero Section */}
       <div className="relative">
         <div className="relative h-[550px] md:h-[600px] lg:h-[650px] overflow-hidden">
-          {/* Imagen de fondo con mejor calidad */}
           <div 
             className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=1600')] bg-cover bg-center"
           ></div>
           
-          {/* Gradiente de transición SUAVE - clave para el efecto limpio */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black"></div>
-          
-          {/* Gradiente adicional para suavizar el borde con el contenido */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent"></div>
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 pt-28 md:pt-32 lg:pt-36">
             <div className="max-w-3xl">
-              {/* Badge animado */}
               <div className="inline-flex items-center gap-2 bg-red-600/20 backdrop-blur-sm text-red-400 text-xs md:text-sm px-4 py-2 rounded-full border border-red-600/30 mb-5 animate-pulse">
                 <Sparkles size={14} />
                 <span>Tu aventura comienza aquí</span>
@@ -130,7 +161,7 @@ export default function Home() {
                 Experiencias auténticas y viajes inolvidables en el corazón de los Andes
               </p>
 
-              {/* Search Bar Premium con mejor contraste */}
+              {/* Search Bar */}
               <div className="mt-8 md:mt-10">
                 <div className="group relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
@@ -152,7 +183,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Stats rápidos */}
+              {/* Stats */}
               <div className="flex gap-6 mt-8">
                 <div className="flex items-center gap-2">
                   <Users size={16} className="text-red-400" />
@@ -172,7 +203,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Contenido Principal con fondo sólido para contraste */}
+      {/* Contenido Principal */}
       <div className="relative z-20 bg-black">
         <div className="max-w-7xl mx-auto px-4">
           
@@ -196,6 +227,7 @@ export default function Home() {
                 return (
                   <div 
                     key={i} 
+                    onClick={() => cat.path && navigate(cat.path)}
                     className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 cursor-pointer hover:scale-[1.02] bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 border border-white/10 hover:border-white/20"
                   >
                     <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
@@ -212,7 +244,6 @@ export default function Home() {
               })}
             </div>
           </div>
-
 
           {/* Banner Promocional */}
           <div className="mt-14 md:mt-20 mb-10">
@@ -261,6 +292,16 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Modal para agregar contenido */}
+      <AddContentModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        type={addType}
+        onSuccess={() => {
+          console.log('Contenido agregado exitosamente');
+        }}
+      />
 
       <BottomNav />
     </div>

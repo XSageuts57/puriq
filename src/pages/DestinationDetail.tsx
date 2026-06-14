@@ -6,8 +6,8 @@ import {
   MapPin,
   Camera,
 } from 'lucide-react';
-
 import { destinations } from '../data/destinations';
+import Reviews from '../components/Reviews';
 
 export default function DestinationDetail() {
   const { id } = useParams();
@@ -41,7 +41,7 @@ export default function DestinationDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-24">
+    <div className="min-h-screen bg-black text-white pb-24">
 
       {/* HERO CON CARRUSEL Y ANIMACIÓN */}
       <div className="relative h-[450px] overflow-hidden">
@@ -62,7 +62,7 @@ export default function DestinationDetail() {
           ))}
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/40 to-black/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10"></div>
 
         {/* INFO */}
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
@@ -94,7 +94,7 @@ export default function DestinationDetail() {
             </span>
 
             <span className="text-zinc-400">
-              • 2,484 opiniones
+              • {destination.reviews} opiniones
             </span>
 
           </div>
@@ -154,6 +154,14 @@ export default function DestinationDetail() {
 
           </div>
 
+        </div>
+
+        {/* SECCIÓN DE OPINIONES - NUEVA */}
+        <div className="mt-10">
+          <Reviews 
+            itemId={destination.id} 
+            itemType="destination"
+          />
         </div>
 
       </div>

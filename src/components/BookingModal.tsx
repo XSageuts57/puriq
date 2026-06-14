@@ -134,7 +134,7 @@ export default function BookingModal({ isOpen, onClose, type, itemTitle, itemLoc
         });
       }, 2000);
 } catch {
-  console.error('Error');
+  setErrorMessage('Error al procesar la reserva. Intenta de nuevo.');
 } finally {
       setIsSubmitting(false);
     }
