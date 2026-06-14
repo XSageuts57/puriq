@@ -11,8 +11,11 @@ import Accommodations from './pages/Accommodations';
 import AccommodationDetail from './pages/AccommodationDetail';
 import Restaurants from './pages/Restaurants';
 import RestaurantDetail from './pages/RestaurantDetail';
-import Tours from './pages/Tours';              // ← NUEVO
-import TourDetail from './pages/TourDetail';    // ← NUEVO
+import Tours from './pages/Tours';
+import TourDetail from './pages/TourDetail';
+
+// NO importes BookingModal aquí
+// import BookingModal from './components/BookingModal'; ← ELIMINA ESTO SI EXISTE
 
 function App() {
   const [user, setUser] = useState<User | null>(null);

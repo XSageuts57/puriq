@@ -1,381 +1,306 @@
-// src/components/BookingModal.tsx
-import { useState } from 'react';
-import { X, Calendar, Clock, Users, MapPin, User, AlertCircle, CheckCircle } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import {
+  Star,
+  MapPin,
+  Wifi,
+  Coffee,
+  Dumbbell,
+  Waves,
+  Utensils,
+  Car,
+  Phone,
+  Mail,
+  Globe,
+  CheckCircle,
+  XCircle,
+  ArrowLeft,
+  Heart,
+  Share2,
+  Info,
+  DollarSign,
+  Sparkles,
+} from 'lucide-react';
+import { getAllAccommodations, type Accommodation } from '../data/accommodations';
+import Reviews from '../components/Reviews';
+import BookingModal from '../components/BookingModal';
 
-interface BookingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  type: 'accommodation' | 'restaurant';
-  itemTitle: string;
-  itemLocation: string;
-}
+export default function AccommodationDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
-export default function BookingModal({ isOpen, onClose, type, itemTitle, itemLocation }: BookingModalProps) {
-  const [formData, setFormData] = useState({
-    // Datos comunes
-    name: '',
-    email: '',
-    phone: '',
-    dni: '',
-    date: '',
-    time: '',
-    // Para alojamiento
-    roomType: '',
-    nights: 1,
-    // Para restaurante
-    peopleCount: 2,
-    specialRequests: '',
-  });
-  
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  // Buscar en TODOS los alojamientos (incluyendo los de usuario)
+  const allAccommodations = getAllAccommodations();
+  const accommodation = allAccommodations.find((acc) => acc.id === id);
 
-  // Opciones de habitaciones para hoteles
-  const roomTypes = [
-    { id: 'standard', name: 'Habitación Estándar', price: 100 },
-    { id: 'double', name: 'Habitación Doble', price: 150 },
-    { id: 'suite', name: 'Suite', price: 250 },
-    { id: 'family', name: 'Habitación Familiar', price: 200 },
-  ];
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // Carrusel automático con animación
+  useEffect(() => {
+    if (!accommodation?.gallery?.length) return;
     
-    if (!formData.name.trim() || formData.name.length < 3) {
-      newErrors.name = 'Nombre completo requerido';
-    }
-    if (!formData.email || !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      newErrors.email = 'Email válido requerido';
-    }
-    if (!formData.phone || formData.phone.length < 9) {
-      newErrors.phone = 'Teléfono válido requerido';
-    }
-    if (!formData.dni || formData.dni.length < 8) {
-      newErrors.dni = 'DNI válido requerido';
-    }
-    if (!formData.date) {
-      newErrors.date = 'Selecciona una fecha';
-    }
-    if (!formData.time) {
-      newErrors.time = 'Selecciona un horario';
-    }
-    if (type === 'accommodation' && !formData.roomType) {
-      newErrors.roomType = 'Selecciona un tipo de habitación';
-    }
-    if (type === 'restaurant' && (!formData.peopleCount || formData.peopleCount < 1)) {
-      newErrors.peopleCount = 'Número de personas válido';
-    }
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => 
+        prev + 1 >= accommodation.gallery.length ? 0 : prev + 1
+      );
+    }, 4000);
     
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return () => clearInterval(interval);
+  }, [accommodation?.gallery?.length]);
+
+  if (!accommodation) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
+        <p className="text-xl">Alojamiento no encontrado</p>
+        <button
+          onClick={() => navigate('/alojamientos')}
+          className="bg-red-600 px-6 py-2 rounded-xl hover:bg-red-700 transition"
+        >
+          Volver a alojamientos
+        </button>
+      </div>
+    );
+  }
+
+  const getAmenityIcon = (amenity: string) => {
+    if (amenity.includes('WiFi')) return <Wifi size={18} className="text-red-400" />;
+    if (amenity.includes('Desayuno')) return <Coffee size={18} className="text-red-400" />;
+    if (amenity.includes('Piscina')) return <Waves size={18} className="text-red-400" />;
+    if (amenity.includes('Gimnasio')) return <Dumbbell size={18} className="text-red-400" />;
+    if (amenity.includes('Restaurante')) return <Utensils size={18} className="text-red-400" />;
+    if (amenity.includes('Estacionamiento')) return <Car size={18} className="text-red-400" />;
+    return <Sparkles size={18} className="text-red-400" />;
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    setErrorMessage('');
-    
-    try {
-      // Crear la reserva
-      const bookingData = {
-        id: `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type: type,
-        itemTitle: itemTitle,
-        itemLocation: itemLocation,
-        customer: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          dni: formData.dni,
-        },
-        bookingDetails: type === 'accommodation' ? {
-          roomType: formData.roomType,
-          nights: formData.nights,
-          date: formData.date,
-          time: formData.time,
-        } : {
-          peopleCount: formData.peopleCount,
-          date: formData.date,
-          time: formData.time,
-          specialRequests: formData.specialRequests,
-        },
-        createdAt: new Date().toISOString(),
-        status: 'pending',
-      };
-      
-      // Guardar en localStorage
-      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      bookings.push(bookingData);
-      localStorage.setItem('bookings', JSON.stringify(bookings));
-      
-      // Enviar notificación al administrador (simulado)
-      console.log('Nueva reserva:', bookingData);
-      
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        setSuccess(false);
-        // Resetear formulario
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          dni: '',
-          date: '',
-          time: '',
-          roomType: '',
-          nights: 1,
-          peopleCount: 2,
-          specialRequests: '',
-        });
-      }, 2000);
-} catch {
-  console.error('Error');
-} finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  // Obtener horarios disponibles (ejemplo)
-  const availableTimes = [
-    '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
-  ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="min-h-screen bg-black text-white pb-24">
+      
+      {/* Botón de retroceso */}
+      <button
+        onClick={() => navigate('/alojamientos')}
+        className="fixed top-5 left-5 z-50 bg-black/60 backdrop-blur-xl p-3 rounded-full border border-white/20 hover:bg-black/80 transition-all"
+      >
+        <ArrowLeft size={22} />
+      </button>
+
+      {/* Botones de acción */}
+      <div className="fixed top-5 right-5 z-50 flex gap-2">
+        <button
+          onClick={() => setIsLiked(!isLiked)}
+          className="bg-black/60 backdrop-blur-xl p-3 rounded-full border border-white/20 hover:bg-black/80 transition-all"
+        >
+          <Heart size={22} className={isLiked ? 'fill-red-500 text-red-500' : 'text-white'} />
+        </button>
+        <button className="bg-black/60 backdrop-blur-xl p-3 rounded-full border border-white/20 hover:bg-black/80 transition-all">
+          <Share2 size={22} />
+        </button>
+      </div>
+
+      {/* Hero Section con Carrusel */}
+      <div className="relative h-[500px] md:h-[600px] overflow-hidden">
         
-        {/* Header */}
-        <div className="sticky top-0 bg-black/95 backdrop-blur-xl border-b border-white/10 p-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold">
-                {type === 'accommodation' ? 'Reservar alojamiento' : 'Reservar mesa'}
+        <div 
+          className="flex transition-transform duration-700 ease-out h-full"
+          style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+        >
+          {(accommodation.gallery || [accommodation.image]).map((img, idx) => (
+            <div key={idx} className="min-w-full h-full relative">
+              <img
+                src={img}
+                alt={`${accommodation.title} - ${idx + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+
+        {/* Información del alojamiento */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin size={17} className="text-red-400" />
+            <span className="text-zinc-300">{accommodation.location}</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+            {accommodation.title}
+          </h1>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Star className="text-yellow-400 fill-yellow-400" size={18} />
+              <span className="font-semibold">{accommodation.rating}</span>
+              <span className="text-zinc-400">({accommodation.reviews} reseñas)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign size={16} className="text-red-400" />
+              <span className="text-zinc-300">${accommodation.price} por noche</span>
+            </div>
+            {(accommodation as Accommodation & { isUserAdded?: boolean }).isUserAdded && (
+              <div className="bg-green-600/20 border border-green-600/30 rounded-full px-3 py-1 text-xs">
+                👤 Agregado por usuario
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido principal */}
+      <div className="max-w-6xl mx-auto px-5 pt-8">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Columna izquierda */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Descripción */}
+            <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6 md:p-8">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Info size={22} className="text-red-400" />
+                Sobre este alojamiento
               </h2>
-              <p className="text-zinc-400 text-sm mt-1">{itemTitle}</p>
-              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1">
-                <MapPin size={12} /> {itemLocation}
+              <p className="text-zinc-300 leading-relaxed text-base md:text-lg">
+                {accommodation.longDescription}
               </p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all">
-              <X size={24} />
-            </button>
+
+            {/* Amenidades */}
+            <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6 md:p-8">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Sparkles size={22} className="text-red-400" />
+                Amenidades
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {accommodation.amenities.map((amenity, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-zinc-300">
+                    {getAmenityIcon(amenity)}
+                    <span className="text-sm">{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ¿Qué incluye? */}
+            {accommodation.includes && accommodation.includes.length > 0 && (
+              <div className="bg-green-600/10 border border-green-600/20 rounded-2xl p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-green-400">
+                  <CheckCircle size={20} />
+                  ¿Qué incluye?
+                </h3>
+                <ul className="space-y-2">
+                  {accommodation.includes.map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-zinc-300 text-sm">
+                      <CheckCircle size={14} className="text-green-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* No incluye */}
+            {accommodation.notIncludes && accommodation.notIncludes.length > 0 && (
+              <div className="bg-red-600/10 border border-red-600/20 rounded-2xl p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-red-400">
+                  <XCircle size={20} />
+                  No incluye
+                </h3>
+                <ul className="space-y-2">
+                  {accommodation.notIncludes.map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-zinc-300 text-sm">
+                      <XCircle size={14} className="text-red-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Sección de reseñas */}
+            <div>
+              <Reviews itemId={accommodation.id} itemType="accommodation" />
+            </div>
+          </div>
+
+          {/* Columna derecha - Tarjeta de reserva */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-2xl p-6">
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-red-400">${accommodation.price}</div>
+                <p className="text-zinc-400 text-sm">por noche</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-sm">
+                  <Star size={16} className="text-yellow-400" />
+                  <span>{accommodation.rating} · {accommodation.reviews} reseñas</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <MapPin size={16} className="text-red-400" />
+                  <span>{accommodation.location}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-red-600/30 mb-4"
+              >
+                Reservar ahora
+              </button>
+
+              {/* Contacto */}
+              <div className="border-t border-white/10 pt-4 mt-4">
+                <p className="text-xs text-zinc-400 mb-2">Contacto directo:</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-zinc-300">
+                    <Phone size={14} className="text-red-400" />
+                    <span>{accommodation.contact.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-zinc-300">
+                    <Mail size={14} className="text-red-400" />
+                    <span className="truncate">{accommodation.contact.email}</span>
+                  </div>
+                  {accommodation.contact.website && (
+                    <div className="flex items-center gap-2 text-sm text-zinc-300">
+                      <Globe size={14} className="text-red-400" />
+                      <a 
+                        href={accommodation.contact.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="truncate hover:text-red-400 transition-colors"
+                      >
+                        {accommodation.contact.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {success ? (
-          <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={32} className="text-green-400" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">¡Reserva confirmada!</h3>
-            <p className="text-zinc-400">
-              Hemos enviado los detalles de tu reserva a tu correo electrónico.
-              {type === 'accommodation' ? '¡Esperamos tu llegada!' : '¡Te esperamos!'}
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-5">
-            
-            {errorMessage && (
-              <div className="bg-red-600/20 border border-red-600/30 rounded-xl p-4 flex items-center gap-3">
-                <AlertCircle className="text-red-400" />
-                <span className="text-red-400 text-sm">{errorMessage}</span>
-              </div>
-            )}
-
-            {/* Datos personales */}
-            <div className="border-b border-white/10 pb-4">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <User size={18} /> Datos personales
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Nombre completo *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={`w-full bg-zinc-800/50 border ${errors.name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                    placeholder="Juan Pérez"
-                  />
-                  {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">DNI *</label>
-                  <input
-                    type="text"
-                    value={formData.dni}
-                    onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
-                    className={`w-full bg-zinc-800/50 border ${errors.dni ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                    placeholder="12345678"
-                  />
-                  {errors.dni && <p className="text-red-400 text-xs mt-1">{errors.dni}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Correo electrónico *</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className={`w-full bg-zinc-800/50 border ${errors.email ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                    placeholder="contacto@ejemplo.com"
-                  />
-                  {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Teléfono *</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className={`w-full bg-zinc-800/50 border ${errors.phone ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                    placeholder="+51 987654321"
-                  />
-                  {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Fecha y hora */}
-            <div className="border-b border-white/10 pb-4">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Calendar size={18} /> Fecha y hora
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Fecha *</label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    min={new Date().toISOString().split('T')[0]}
-                    className={`w-full bg-zinc-800/50 border ${errors.date ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                  />
-                  {errors.date && <p className="text-red-400 text-xs mt-1">{errors.date}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Hora *</label>
-                  <select
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className={`w-full bg-zinc-800/50 border ${errors.time ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                  >
-                    <option value="">Seleccionar hora</option>
-                    {availableTimes.map(time => (
-                      <option key={time} value={time}>{time}</option>
-                    ))}
-                  </select>
-                  {errors.time && <p className="text-red-400 text-xs mt-1">{errors.time}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Campos específicos para alojamiento */}
-            {type === 'accommodation' && (
-              <div className="border-b border-white/10 pb-4">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Clock size={18} /> Detalles de la estadía
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-2">Tipo de habitación *</label>
-                    <select
-                      value={formData.roomType}
-                      onChange={(e) => setFormData({ ...formData, roomType: e.target.value })}
-                      className={`w-full bg-zinc-800/50 border ${errors.roomType ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                    >
-                      <option value="">Seleccionar habitación</option>
-                      {roomTypes.map(room => (
-                        <option key={room.id} value={room.name}>
-                          {room.name} - ${room.price}/noche
-                        </option>
-                      ))}
-                    </select>
-                    {errors.roomType && <p className="text-red-400 text-xs mt-1">{errors.roomType}</p>}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-2">Número de noches</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="30"
-                      value={formData.nights}
-                      onChange={(e) => setFormData({ ...formData, nights: parseInt(e.target.value) })}
-                      className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Campos específicos para restaurante */}
-            {type === 'restaurant' && (
-              <div className="border-b border-white/10 pb-4">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Users size={18} /> Detalles de la reserva
-                </h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Número de personas *</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={formData.peopleCount}
-                    onChange={(e) => setFormData({ ...formData, peopleCount: parseInt(e.target.value) })}
-                    className={`w-full bg-zinc-800/50 border ${errors.peopleCount ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-all`}
-                  />
-                  {errors.peopleCount && <p className="text-red-400 text-xs mt-1">{errors.peopleCount}</p>}
-                </div>
-                
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Peticiones especiales (opcional)</label>
-                  <textarea
-                    value={formData.specialRequests}
-                    onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
-                    rows={3}
-                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition-all resize-none"
-                    placeholder="Alergias, preferencias, ocasión especial..."
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Botones */}
-            <div className="flex gap-4 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 bg-white/10 border border-white/20 py-3 rounded-xl font-medium hover:bg-white/20 transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Procesando...' : 'Confirmar reserva'}
-              </button>
-            </div>
-          </form>
-        )}
+        {/* Botón volver */}
+        <div className="mt-10 mb-8 text-center">
+          <button
+            onClick={() => navigate('/alojamientos')}
+            className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+          >
+            ← Volver a todos los alojamientos
+          </button>
+        </div>
       </div>
+
+      {/* Modal de reserva */}
+      <BookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        type="accommodation"
+        itemTitle={accommodation.title}
+        itemLocation={accommodation.location}
+      />
+
+      <BottomNav />
     </div>
   );
 }
